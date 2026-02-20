@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaPaperPlane, FaCheckCircle } from 'react-icons/fa';
+import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaPaperPlane, FaCheckCircle, FaFileDownload } from 'react-icons/fa';
 
 const contactInfo = [
   { icon: FaEnvelope, label: 'Email', value: 'abhi96anand@gmail.com', href: 'mailto:abhi96anand@gmail.com' },
@@ -110,6 +110,18 @@ export default function Contact() {
             <p className="text-slate-500 text-sm mt-4">
               Company: <span className="text-slate-300">Avology Technology Pvt Ltd</span>
             </p>
+            <a
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 glass rounded-xl p-4 hover:bg-white/10 transition-colors group border border-amber-500/20"
+            >
+              <FaFileDownload className="w-6 h-6 text-amber-400 group-hover:text-amber-300 transition-colors" />
+              <div>
+                <p className="text-xs text-slate-500 uppercase tracking-wider">Resume</p>
+                <p className="text-slate-200 font-medium">Download my resume (PDF)</p>
+              </div>
+            </a>
           </motion.div>
 
           <AnimatePresence mode="wait">
