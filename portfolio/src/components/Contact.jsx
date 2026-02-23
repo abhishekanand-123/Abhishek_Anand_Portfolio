@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useForm, ValidationError } from '@formspree/react';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaPaperPlane, FaCheckCircle, FaFileDownload } from 'react-icons/fa';
 
 const contactInfo = [
@@ -8,50 +9,64 @@ const contactInfo = [
   { icon: FaMapMarkerAlt, label: 'Location', value: 'Mohali', href: null },
 ];
 
-// Formspree: messages are sent to abhi96anand@gmail.com
-// Get your form ID from https://formspree.io (create form → use that email) and add to .env as VITE_FORMSPREE_ID
-const FORMSPREE_ID = import.meta.env.VITE_FORMSPREE_ID;
+const FORMSPREE_FORM_ID = 'xeelpeal';
+
+function ContactFormBlock({ onSuccessView }) {
+  const [state, handleSubmit] = useForm(FORMSPREE_FORM_ID);
+  if (state.succeeded) {
+    onSuccessView?.();
+    return null;
+  }
+  return (
+    <motion.form
+      key="form"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      viewport={{ once: true }}
+      onSubmit={handleSubmit}
+      className="glass rounded-2xl p-6 space-y-4"
+    >
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-slate-400 mb-1">Name</label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50"
+          placeholder="Your name"
+        />
+      </div>
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-slate-400 mb-1">Email</label>
+        <input id="email" name="email" type="email" required className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50" placeholder="your@email.com" />
+        <ValidationError prefix="Email" field="email" errors={state.errors} className="text-red-400 text-sm mt-1 block" />
+      </div>
+      <div>
+        <label htmlFor="message" className="block text-sm font-medium text-slate-400 mb-1">Message</label>
+        <textarea id="message" name="message" rows={4} required className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 resize-none" placeholder="Your message..." />
+        <ValidationError prefix="Message" field="message" errors={state.errors} className="text-red-400 text-sm mt-1 block" />
+      </div>
+      <button
+        type="submit"
+        disabled={state.submitting}
+        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed"
+      >
+        <FaPaperPlane className="w-4 h-4" />
+        {state.submitting ? 'Sending...' : 'Send Message'}
+      </button>
+    </motion.form>
+  );
+}
 
 export default function Contact() {
-  const [formState, setFormState] = useState({ name: '', email: '', message: '' });
-  const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState(null);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSending(true);
-    try {
-      if (!FORMSPREE_ID) {
-        throw new Error('Formspree ID not set. Add VITE_FORMSPREE_ID in .env — see README.');
-      }
-      const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formState.name,
-          email: formState.email,
-          message: formState.message,
-          _replyto: formState.email,
-        }),
-      });
-      if (!res.ok) throw new Error('Could not send message. Please try again.');
-      setSubmitted(true);
-      setFormState({ name: '', email: '', message: '' });
-    } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
-    } finally {
-      setSending(false);
-    }
-  };
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [formKey, setFormKey] = useState(0);
 
   const handleSendAnother = () => {
-    setSubmitted(false);
-  };
-
-  const handleChange = (e) => {
-    setFormState((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setShowSuccess(false);
+    setFormKey((k) => k + 1);
   };
 
   return (
@@ -125,7 +140,7 @@ export default function Contact() {
           </motion.div>
 
           <AnimatePresence mode="wait">
-            {submitted ? (
+            {showSuccess ? (
               <motion.div
                 key="success"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -154,72 +169,7 @@ export default function Contact() {
                 </button>
               </motion.div>
             ) : (
-              <motion.form
-                key="form"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                viewport={{ once: true }}
-                onSubmit={handleSubmit}
-                className="glass rounded-2xl p-6 space-y-4"
-              >
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-slate-400 mb-1">
-                    Name
-                  </label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value={formState.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50"
-                    placeholder="Your name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-slate-400 mb-1">
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formState.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50"
-                    placeholder="your@email.com"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-slate-400 mb-1">
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={4}
-                    value={formState.message}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 resize-none"
-                    placeholder="Your message..."
-                  />
-                </div>
-                {error && (
-                  <p className="text-red-400 text-sm text-center py-1">{error}</p>
-                )}
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  <FaPaperPlane className="w-4 h-4" />
-                  {sending ? 'Sending...' : 'Send Message'}
-                </button>
-              </motion.form>
+              <ContactFormBlock key={formKey} onSuccessView={() => setShowSuccess(true)} />
             )}
           </AnimatePresence>
         </div>
