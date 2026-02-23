@@ -123,7 +123,7 @@ export default function Hero() {
               View Projects
             </a>
             <a
-              href={`${import.meta.env.BASE_URL}resume.pdf`}
+              href="/resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 rounded-xl glass border border-white/20 text-slate-200 font-semibold hover:bg-white/10 hover:border-amber-500/50 transition-all flex items-center gap-2"

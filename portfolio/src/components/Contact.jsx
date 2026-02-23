@@ -126,7 +126,7 @@ export default function Contact() {
               Company: <span className="text-slate-300">Avology Technology Pvt Ltd</span>
             </p>
             <a
-              href={`${import.meta.env.BASE_URL}resume.pdf`}
+              href="/resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 glass rounded-xl p-4 hover:bg-white/10 transition-colors group border border-amber-500/20"
